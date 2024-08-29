@@ -1,12 +1,14 @@
+use binread::{io::Cursor, BinRead};
+
 #[derive(BinRead)]
-struct PartPacked {
+pub struct PartPacked {
     parent_index: u32,
     geometry: u32,
     animation: u32,
 }
 
 #[derive(BinRead)]
-struct AnimationInst {
+pub struct AnimationInst {
     t: u16,
     len: u16,
     c: u16,
@@ -14,7 +16,7 @@ struct AnimationInst {
 }
 
 #[derive(BinRead, Debug, Clone)]
-struct AnimationFrame {
+pub struct AnimationFrame {
     vx: i16,
     vy: i16,
     vz: i16,
@@ -22,14 +24,14 @@ struct AnimationFrame {
 }
 
 #[derive(Debug, Clone)]
-struct AnimationFrames {
+pub struct AnimationFrames {
     translation: AnimationFrame,
     rotation: AnimationFrame,
     scale: AnimationFrame,
 }
 
 #[derive(Clone, Debug)]
-struct Part {
+pub struct Part {
     vert_offset: usize,
     vert_len: usize,
     tex_offset: usize,
@@ -38,7 +40,7 @@ struct Part {
 }
 
 #[derive(BinRead)]
-struct Header {
+pub struct Header {
     texture_offset: u32,
     _part_count: u32,
     #[br(count=_part_count)]
