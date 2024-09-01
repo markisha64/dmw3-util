@@ -4,7 +4,7 @@ use std::{io::Cursor, ops::Range};
 #[derive(Clone)]
 pub struct Packed {
     pub assumed_length: Vec<usize>,
-    buffer: Vec<u8>,
+    pub buffer: Vec<u8>,
 }
 
 impl Packed {
