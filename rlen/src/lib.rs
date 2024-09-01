@@ -81,9 +81,5 @@ pub fn rlen_encode(bytes: &Vec<u8>) -> Vec<u8> {
         }
     }
 
-    // push ending header
-    result.push(0x0);
-    result.push(0x0);
-
     result
 }
