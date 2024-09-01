@@ -3,8 +3,13 @@ name = "dmw3-util"
 version = "0.1.0"
 edition = "2021"
 
+[depdendancies]
+rlen = { path = "./rlen" }
+
 [workspace]
-members = [ "dmw3_pack", "model",
+members = [ 
+  "pack", 
+  "model",
   "rlen",
   "tim"
 ]

@@ -38,3 +38,52 @@ pub fn rlen_decode(bytes: &[u8]) -> Result<Vec<u8>, String> {
 
     Ok(result)
 }
+
+pub fn rlen_encode(bytes: &Vec<u8>) -> Vec<u8> {
+    let mut result: Vec<u8> = "RLEN".into();
+
+    result.extend((bytes.len() as u32).to_le_bytes().iter());
+
+    let mut i = 0;
+
+    while i < bytes.len() {
+        if i >= bytes.len() - 1 {
+            result.push(0x1);
+            result.push(bytes[i]);
+
+            break;
+        }
+
+        if bytes[i] != bytes[i + 1] {
+            let mut j = i;
+
+            while j < bytes.len() - 1 && bytes[j] != bytes[j + 1] && j - i < 127 {
+                j += 1;
+            }
+
+            result.push((j - i) as u8);
+            result.extend_from_slice(&bytes[i..j]);
+
+            i = j;
+        } else {
+            let mut j = i;
+
+            while j < bytes.len() - 1 && bytes[j] == bytes[j + 1] && j - i < 126 {
+                j += 1;
+            }
+
+            j += 1;
+
+            result.push((j - i) as u8 + 0x80);
+            result.push(bytes[i]);
+
+            i = j;
+        }
+    }
+
+    // push ending header
+    result.push(0x0);
+    result.push(0x0);
+
+    result
+}
