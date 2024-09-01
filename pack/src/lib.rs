@@ -13,11 +13,11 @@ impl Packed {
     }
 
     pub fn get_offset(&self, idx: usize) -> anyhow::Result<u32> {
+        let mult = idx * 4;
         Ok(u32::from_le_bytes(self.buffer[mult..mult + 4].try_into()?))
     }
 
     pub fn get_file(&self, idx: usize) -> anyhow::Result<&[u8]> {
-        let mult = idx * 4;
         let offset = self.get_offset(idx)? as usize;
 
         Ok(&self.buffer[offset..])
