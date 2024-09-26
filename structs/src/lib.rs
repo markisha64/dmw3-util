@@ -11,7 +11,7 @@ pub struct EnemyStats {
 
     pub drop_rate: u16,
 
-    some_index: u16,
+    pub some_index: u16,
 
     pub attack: u16,
 
