@@ -15,9 +15,9 @@ pub struct EnemyStats {
 
     pub attack: u16,
 
-    move_1: u16,
+    pub move_1: u16,
 
-    move_2: u16,
+    pub move_2: u16,
 
     pub str: i16,
 
@@ -125,15 +125,15 @@ pub struct DigivolutionData {
 
     pub dna_dv_tech: u16,
 
-    psn_rate: u8,
+    pub psn_rate: u8,
 
-    par_rate: u8,
+    pub par_rate: u8,
 
-    cnf_rate: u8,
+    pub cnf_rate: u8,
 
-    slp_rate: u8,
+    pub slp_rate: u8,
 
-    ko_rate: u8,
+    pub ko_rate: u8,
 
     #[br(count = 5)]
     pub tech_learn_level: Vec<u8>,
