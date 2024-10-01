@@ -83,7 +83,7 @@ pub struct EncounterData {
 pub struct PartyData {
     pub encounters: [Pointer; 3],
 
-    pub type: u8,
+    pub p_type: u8,
 
     pub poison_immunity: u8,
 
