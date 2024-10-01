@@ -112,6 +112,8 @@ pub struct PartyData {
     pub escape_immunity: u8,
 
     _padding: u16,
+
+    _padding_1: u8,
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
