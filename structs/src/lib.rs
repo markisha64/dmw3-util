@@ -64,7 +64,7 @@ pub struct EnemyStats {
     moveset_4: Moveset,
 
     counter_moveset: Moveset,
-
+}
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
 pub struct EncounterData {
