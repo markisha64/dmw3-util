@@ -79,6 +79,37 @@ pub struct EncounterData {
     pub multiplier: u16,
 }
 
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
+pub struct PartyData {
+    pub encounters: [3; Pointer],
+
+    pub type: u8,
+
+    pub poison_immunity: u8,
+
+    pub paralysis_immunity: u8,
+
+    pub confuse_immunity: u8,
+
+    pub sleep_immunity: u8,
+
+    pub one_hit_ko_immunity: u8,
+
+    pub drain_immunity: u8,
+
+    pub unk_immunity: u8,
+
+    pub steal_immunity: u8,
+
+    pub power_down_immunity: u8,
+
+    pub defense_down_immunity: u8,
+
+    pub speed_down_immunity: u8,
+
+    pub escape_immunity: u8,
+}
+
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
 struct Moveset {
     action: u8,
