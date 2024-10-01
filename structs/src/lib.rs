@@ -85,6 +85,8 @@ pub struct EncounterData {
 pub struct PartyData {
     pub encounters: [Pointer; 3],
 
+    _padding_1: u8,
+
     pub p_type: u8,
 
     pub poison_immunity: u8,
@@ -112,8 +114,6 @@ pub struct PartyData {
     pub escape_immunity: u8,
 
     _padding: u16,
-
-    _padding_1: u8,
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
