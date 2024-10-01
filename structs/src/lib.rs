@@ -81,7 +81,7 @@ pub struct EncounterData {
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
 pub struct PartyData {
-    pub encounters: [3; Pointer],
+    pub encounters: [Pointer; 3],
 
     pub type: u8,
 
