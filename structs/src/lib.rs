@@ -1,6 +1,8 @@
 use binread::BinRead;
 use binwrite::BinWrite;
 use dmw3_consts;
+use std::cmp::Ordering;
+use std::cmp::PartialOrd;
 use std::fmt::Debug;
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
@@ -211,9 +213,21 @@ pub struct Shop {
     pub items: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, PartialEq)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, Eq, Ord, Default)]
 pub struct Pointer {
     pub value: u32,
+}
+
+impl PartialEq for Pointer {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl PartialOrd for Pointer {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
@@ -357,12 +371,6 @@ impl Pointer {
 
     pub fn null(&self) -> bool {
         return self.value == 0;
-    }
-}
-
-impl PartialEq for Pointer {
-    fn eq(&self, other: &Pointer) -> bool {
-        self.value == other.value
     }
 }
 

@@ -5,9 +5,14 @@ edition = "2021"
 
 [depdendancies]
 rlen = { path = "./rlen" }
+pack = { path = "./pack" }
+model = { path = "./model" }
+structs = { path = "./structs" }
+tim = { path = "./tim" }
 
 [workspace]
 members = [ 
+  "structs",
   "pack", 
   "model",
   "rlen",
