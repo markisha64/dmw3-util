@@ -32,6 +32,7 @@ pub const LUI_INSTRUCTION: &[u8; 2] = b"\x02\x3c";
 pub const ENVIRONMENTAL_INSTRUCTION: &[u8; 4] = b"\x14\x00\x22\xae";
 pub const ENTITIES_INSTRUCTION: &[u8; 4] = b"\x4c\x00\x22\xae";
 pub const TALK_FILE_INSTRUCTION: &[u8; 4] = b"\x44\x00\x22\xae";
+pub const STAGE_ENCOUNTERS_INSTRUCTION: &[u8; 4] = b"\x20\x00\x22\xae";
 pub const STAGE_COLOR_INSTRUCTION_HALF: &[u8; 2] = b"\x38\x00";
 
 pub const ADDIU: u8 = 0x24;
