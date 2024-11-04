@@ -322,6 +322,26 @@ pub struct MapColor {
     pub tint: u8,
 }
 
+#[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct StageEncounter {
+    pub team_id: u32,
+    pub stage: u32,
+    pub music: u32,
+}
+
+#[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct StageEncounterArea {
+    pub steps_inddex: u32,
+    pub teams: [Pointer; 8],
+}
+
+#[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct StageEncounters {
+    pub unk1: i32,
+    pub unk2: i32,
+    pub areas: [Pointer; 4],
+}
+
 impl Pointer {
     pub fn to_index(&self) -> u32 {
         self.value - 0x8000f800
