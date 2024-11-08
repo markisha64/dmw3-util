@@ -339,7 +339,7 @@ pub struct StageEncounterArea {
 pub struct StageEncounters {
     pub unk1: i32,
     pub unk2: i32,
-    pub areas: [Pointer; 4],
+    pub areas: [Pointer; 5],
 }
 
 impl Pointer {
