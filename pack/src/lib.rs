@@ -25,6 +25,24 @@ impl Packed {
     pub fn iter(&self) -> std::ops::Range<usize> {
         0..self.files.len()
     }
+
+    pub fn to_bytes_text(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        let mut i: u32 = (self.files.len() * 4) as u32 + 4;
+
+        (self.files.len() as u32).write(&mut result).unwrap();
+
+        for file in &self.files {
+            i.write(&mut result).unwrap();
+            i += file.len() as u32;
+        }
+
+        for file in &self.files {
+            result.extend(file);
+        }
+
+        result
+    }
 }
 
 impl Packed {
@@ -106,12 +124,15 @@ impl From<Vec<u8>> for Packed {
 impl From<Packed> for Vec<u8> {
     fn from(val: Packed) -> Self {
         let mut result = Vec::new();
-        let mut i: u32 = (val.files.len() * 4) as u32 + 4;
-
-        (val.files.len() as u32).write(&mut result).unwrap();
+        let mut i: u32 = (val.files.len() * 4) as u32;
 
         for file in &val.files {
-            i.write(&mut result).unwrap();
+            if file.len() == 0 {
+                (0 as u32).write(&mut result).unwrap();
+            } else {
+                i.write(&mut result).unwrap();
+            }
+
             i += file.len() as u32;
         }
 
