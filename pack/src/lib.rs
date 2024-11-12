@@ -9,6 +9,13 @@ pub struct Packed {
 
 impl Packed {
     pub fn file_size(&self) -> usize {
+        let header_length = self.files.len() * 4;
+        let files_length = self.files.iter().fold(0, |pv, cv| pv + cv.len());
+
+        header_length + files_length
+    }
+
+    pub fn file_size_text(&self) -> usize {
         let header_length = self.files.len() * 4 + 4;
         let files_length = self.files.iter().fold(0, |pv, cv| pv + cv.len());
 
@@ -86,7 +93,12 @@ impl From<Vec<u8>> for Packed {
             files.push(file[offsets[i] as usize..*sidx as usize].into());
         }
 
-        files.push(file[*offsets.last().unwrap() as usize..].into());
+        if *offsets.last().unwrap() == 0 {
+            files.push(Vec::new());
+        } else {
+            files.push(file[*offsets.last().unwrap() as usize..].into());
+        }
+
         Packed { files }
     }
 }
