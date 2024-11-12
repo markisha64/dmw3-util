@@ -1,127 +1,112 @@
 use binread::BinRead;
-use std::{io::Cursor, ops::Range};
+use binwrite::BinWrite;
+use std::io::Cursor;
 
 #[derive(Clone)]
 pub struct Packed {
-    pub assumed_length: Vec<usize>,
-    pub buffer: Vec<u8>,
+    pub files: Vec<Vec<u8>>,
 }
 
 impl Packed {
-    pub fn _file_size(&self) -> usize {
-        self.buffer.len()
+    pub fn file_size(&self) -> usize {
+        let header_length = self.files.len() * 4 + 4;
+        let files_length = self.files.iter().fold(0, |pv, cv| pv + cv.len());
+
+        header_length + files_length
     }
 
-    pub fn get_offset(&self, idx: usize) -> anyhow::Result<u32> {
-        let mult = idx * 4;
-        Ok(u32::from_le_bytes(self.buffer[mult..mult + 4].try_into()?))
-    }
-
-    pub fn get_file(&self, idx: usize) -> anyhow::Result<&[u8]> {
-        let offset = self.get_offset(idx)? as usize;
-
-        Ok(&self.buffer[offset..])
-    }
-
-    pub fn iter(&self) -> Range<usize> {
-        0..self.assumed_length.len()
+    pub fn iter(&self) -> std::ops::Range<usize> {
+        0..self.files.len()
     }
 }
 
-impl TryFrom<Vec<u8>> for Packed {
-    type Error = anyhow::Error;
-
-    fn try_from(file: Vec<u8>) -> Result<Self, Self::Error> {
+impl Packed {
+    pub fn from_text(file: Vec<u8>) -> Packed {
         let mut reader = Cursor::new(&file);
+        let mut files: Vec<Vec<u8>> = Vec::new();
 
-        let first_offset = u32::read(&mut reader)?;
-        let length = first_offset / 4;
+        let length = u32::read(&mut reader).unwrap();
 
-        let mut offsets: Vec<usize> = vec![first_offset as usize];
-        for _ in 1..length {
-            let offset = u32::read(&mut reader)? as usize;
-
-            offsets.push(offset);
+        if length == 0 {
+            return Packed { files };
         }
 
-        let mut assumed_length = Vec::new();
+        let mut offsets: Vec<u32> = Vec::new();
+        for _ in 0..length {
+            offsets.push(u32::read(&mut reader).unwrap());
+        }
 
         for i in 0..offsets.len() - 1 {
-            let offset1 = match offsets.get(i + 1) {
-                Some(k) => *k as i32,
-                None => return Err(anyhow::anyhow!("invalid index")),
-            };
+            if offsets[i] >= offsets[i + 1] {
+                files.push(Vec::new());
+                continue;
+            }
 
-            let offset2 = match offsets.get(i) {
-                Some(k) => *k as i32,
-                None => return Err(anyhow::anyhow!("invalid index")),
-            };
-
-            assumed_length.push((offset1 - offset2).max(0) as usize);
+            files.push(file[offsets[i] as usize..offsets[i + 1] as usize].into());
         }
 
-        let last_offset = match offsets.last() {
-            Some(k) => *k as i32,
-            None => return Err(anyhow::anyhow!("empty vec")),
-        };
-
-        assumed_length.push((file.len() as i32 - last_offset).max(0) as usize);
-
-        Ok(Packed {
-            buffer: file.into(),
-            assumed_length,
-        })
+        files.push(file[*offsets.last().unwrap() as usize..].into());
+        Packed { files }
     }
 }
 
-impl TryFrom<&[u8]> for Packed {
-    type Error = anyhow::Error;
-
-    fn try_from(file: &[u8]) -> Result<Self, Self::Error> {
+impl From<Vec<u8>> for Packed {
+    fn from(file: Vec<u8>) -> Self {
         let mut reader = Cursor::new(&file);
+        let mut files: Vec<Vec<u8>> = Vec::new();
 
-        let first_offset = u32::read(&mut reader)?;
-        let length = first_offset / 4;
+        let first_offset = u32::read(&mut reader).unwrap();
 
-        let mut offsets: Vec<usize> = vec![first_offset as usize];
-        for _ in 1..length {
-            let offset = u32::read(&mut reader)? as usize;
-
-            offsets.push(offset);
+        if first_offset == 0 {
+            return Packed { files };
         }
 
-        let mut assumed_length = Vec::new();
+        let mut offsets: Vec<u32> = vec![first_offset];
+        for _ in 1..first_offset / 4 {
+            offsets.push(u32::read(&mut reader).unwrap());
+        }
 
+        let len = file.len() as u32;
+
+        // currently omitting overlaps, do better handling eventually
+        let mut last_offset = offsets[0];
         for i in 0..offsets.len() - 1 {
-            let offset1 = match offsets.get(i + 1) {
-                Some(k) => *k as i32,
-                None => return Err(anyhow::anyhow!("invalid index")),
-            };
+            if offsets[i] < last_offset {
+                files.push(Vec::new());
+                continue;
+            }
 
-            let offset2 = match offsets.get(i) {
-                Some(k) => *k as i32,
-                None => return Err(anyhow::anyhow!("invalid index")),
-            };
+            let sidx = offsets[i + 1..]
+                .iter()
+                .find(|x| **x > offsets[i])
+                .unwrap_or(&len);
 
-            assumed_length.push((offset1 - offset2).max(0) as usize);
+            last_offset = *sidx;
+
+            files.push(file[offsets[i] as usize..*sidx as usize].into());
         }
 
-        let last_offset = match offsets.last() {
-            Some(k) => *k as i32,
-            None => return Err(anyhow::anyhow!("empty vec")),
-        };
-
-        assumed_length.push((file.len() as i32 - last_offset).max(0) as usize);
-
-        Ok(Packed {
-            buffer: file.into(),
-            assumed_length,
-        })
+        files.push(file[*offsets.last().unwrap() as usize..].into());
+        Packed { files }
     }
 }
 
-impl Into<Vec<u8>> for Packed {
-    fn into(self) -> Vec<u8> {
-        self.buffer.clone()
+impl From<Packed> for Vec<u8> {
+    fn from(val: Packed) -> Self {
+        let mut result = Vec::new();
+        let mut i: u32 = (val.files.len() * 4) as u32 + 4;
+
+        (val.files.len() as u32).write(&mut result).unwrap();
+
+        for file in &val.files {
+            i.write(&mut result).unwrap();
+            i += file.len() as u32;
+        }
+
+        for file in val.files {
+            result.extend(file);
+        }
+
+        result
     }
 }
