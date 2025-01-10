@@ -117,6 +117,13 @@ pub struct PartyData {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct PartyExpBits {
+    pub dv_exp: u32,
+    pub exp: u32,
+    pub bits: u32,
+}
+
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
 struct Moveset {
     action: u8,
     comparator: u8,
