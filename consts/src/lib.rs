@@ -95,3 +95,5 @@ pub const SHOP_NAMES_MAPPED: [u32; 30] = [
     0x0B, 0x1B, 0x1C, 0x0F, // 24-27
     0x16, 0xA,
 ];
+
+pub const SCREEN_NAME_MAPPING: &[u8] = b"\x0b\x01\x00\x02";

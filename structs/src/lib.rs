@@ -418,3 +418,10 @@ impl From<[u8; 4]> for Pointer {
         }
     }
 }
+
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct ScreenNameMapping {
+    pub sector_name_idx: u8,
+    pub screen_name_idx: u8,
+    pub stage_id: ushort,
+}
