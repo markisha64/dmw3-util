@@ -304,13 +304,13 @@ pub struct Environmental {
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
 pub struct EntityData {
-    conditions: Pointer,
+    pub conditions: Pointer,
     pub logic: Pointer,
     pub sprite: u16,
     sprite_buffer_index: u16,
-    x: u16,
-    y: u16,
-    direction: u16,
+    pub x: u16,
+    pub y: u16,
+    pub direction: u16,
     padding: u16,
 }
 
