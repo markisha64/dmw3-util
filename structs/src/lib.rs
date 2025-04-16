@@ -318,7 +318,7 @@ pub struct EntityData {
 pub struct EntityLogic {
     pub conditions: Pointer,
     pub script: Pointer,
-    pub text_index: u16,
+    pub text_index: u32,
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
