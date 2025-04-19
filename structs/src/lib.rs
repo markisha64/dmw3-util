@@ -315,6 +315,13 @@ pub struct EntityData {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct ScriptConditionStep {
+    pub value: u8,
+    pub s_type: u8,
+    pub flag: u16,
+}
+
+#[derive(BinRead, Debug, Clone, BinWrite)]
 pub struct EntityLogic {
     pub conditions: Pointer,
     pub script: Pointer,
