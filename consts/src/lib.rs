@@ -97,3 +97,21 @@ pub const SHOP_NAMES_MAPPED: [u32; 30] = [
 ];
 
 pub const SCREEN_NAME_MAPPING: &[u8] = b"\x0b\x01\x00\x02";
+
+pub const CHARISMA_VALUES: [u32; 15] = [
+    60,   // 0x003C
+    150,  // 0x0096
+    210,  // 0x00D2
+    285,  // 0x011D
+    378,  // 0x017A
+    492,  // 0x01EC
+    630,  // 0x0276
+    795,  // 0x031B
+    990,  // 0x03DE
+    1218, // 0x04C2
+    1482, // 0x05CA
+    1785, // 0x06F9
+    2049, // 0x0801
+    2277, // 0x08E5
+    2472, // 0x09A8
+];
