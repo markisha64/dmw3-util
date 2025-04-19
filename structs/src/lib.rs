@@ -314,11 +314,17 @@ pub struct EntityData {
     padding: u16,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Copy, Clone, BinWrite)]
 pub struct ScriptConditionStep {
     pub value: u8,
     pub s_type: u8,
     pub flag: u16,
+}
+
+impl ScriptConditionStep {
+    pub fn is_last_step(self) -> bool {
+        return self.value == 0xff && self.s_type == 0xff && self.flag == 0;
+    }
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
