@@ -316,8 +316,7 @@ pub struct EntityData {
 
 #[derive(BinRead, Debug, Copy, Clone, BinWrite)]
 pub struct ScriptConditionStep {
-    pub value: u8,
-    pub s_type: u8,
+    pub bitfield: u16,
     pub flag: u16,
 }
 
