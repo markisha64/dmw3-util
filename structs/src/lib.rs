@@ -322,7 +322,7 @@ pub struct ScriptConditionStep {
 
 impl ScriptConditionStep {
     pub fn is_last_step(self) -> bool {
-        return self.value == 0xff && self.s_type == 0xff && self.flag == 0;
+        return self.bitfield == 0xffff && self.flag == 0;
     }
 }
 
