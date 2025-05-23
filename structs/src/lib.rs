@@ -361,6 +361,25 @@ pub struct StageEncounters {
     pub areas: [Pointer; 5],
 }
 
+#[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct CardShopData {
+    pub shop_id: i32,
+    _card_count: i32,
+    pub items: Pointer,
+}
+
+#[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct CardPricing {
+    pub card_id: i16,
+    pub pricing: i16,
+}
+
+#[derive(BinRead, Debug, Clone, BinWrite)]
+pub struct BoosterData {
+    pub booster_item_id: i32,
+    pub slots: [Pointer; 6],
+}
+
 impl Pointer {
     pub fn to_index(&self) -> u32 {
         self.value - 0x8000f800
