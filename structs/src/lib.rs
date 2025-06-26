@@ -243,17 +243,16 @@ impl PartialOrd for Pointer {
 pub struct MoveData {
     pub mp: u16,
     pub power: u16,
-    unk1: u16,
+    pub move_type: u8,
+    unk1: u8,
     pub accuracy: u8,
-    unk2: u8,
-    boost: u8,
-    effective_against: u8,
+    pub boosted_stat: u8,
+    pub boost: u8,
+    pub effective_against: u8,
     pub hit_effect: u8,
     pub effect_rate: u8,
     pub effect_value: u8,
-    unk3: u8,
-    unk4: u16,
-    move_type: u8,
+    unk4: u32,
     pub freq: u8,
 }
 
