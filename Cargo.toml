@@ -9,6 +9,7 @@ pack = { path = "./pack" }
 model = { path = "./model" }
 structs = { path = "./structs" }
 tim = { path = "./tim" }
+grid = { path = "./grid" }
 
 [workspace]
 members = [ 
