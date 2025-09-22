@@ -1,9 +1,11 @@
+#[derive(Clone, Debug)]
 pub struct GridInfo {
     pub width: u8,
     pub height: u8,
     pub blocks_128_indices: Vec<u8>,
 }
 
+#[derive(Clone, Debug)]
 pub struct Grid {
     pub info: GridInfo,
     pub blocks_64_indices: Vec<[[u8; 2]; 2]>,
