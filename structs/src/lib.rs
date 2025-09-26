@@ -325,6 +325,13 @@ impl ScriptConditionStep {
     }
 }
 
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct ComplexScriptConditionStep {
+    pub id: u8,
+    pub operation_and_type: u8,
+    pub value: u8,
+}
+
 #[derive(BinRead, Debug, Clone, BinWrite)]
 pub struct EntityLogic {
     pub conditions: Pointer,
