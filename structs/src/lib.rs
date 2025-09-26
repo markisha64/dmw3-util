@@ -462,3 +462,9 @@ pub struct ScreenNameMapping {
     pub screen_name_idx: u8,
     pub stage_id: u16,
 }
+
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct QuestRange {
+    pub min: u8,
+    pub max: u8,
+}
