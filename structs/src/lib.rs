@@ -468,3 +468,21 @@ pub struct QuestRange {
     pub min: u8,
     pub max: u8,
 }
+
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct StageOverride {
+    pub var1: i16,
+    pub var2: i16,
+    pub overrides: Pointer,
+}
+
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct EnvironmentalOverride {
+    pub next_stage_id: u16,
+    pub var1: i16,
+    pub var2: i16,
+    pub next_stage_x: i16,
+    pub next_stage_y: i16,
+    pub next_stage_direction: u16,
+    pub next: Pointer,
+}
