@@ -16,5 +16,6 @@ members = [
   "pack", 
   "model",
   "rlen",
-  "tim"
-, "grid"]
+  "tim",
+  "grid",
+  "lang"]
