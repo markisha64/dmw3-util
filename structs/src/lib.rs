@@ -486,3 +486,23 @@ pub struct EnvironmentalOverride {
     pub next_stage_direction: u16,
     pub next: Pointer,
 }
+
+#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+pub struct MaskObject {
+    pub show: u8,
+    pub instance_id: u8,
+    pub z: u8,
+    pub type1: u8,
+    pub id: u8,
+    pub type2: u8,
+    pub min_frame: u8,
+    pub max_frame: u8,
+    pub animation_speed: u8,
+    pub current_frame: u8,
+
+    pub x: u16,
+    pub y: u16,
+
+    pub unk1: i16,
+    pub frame_counter: i16,
+}
