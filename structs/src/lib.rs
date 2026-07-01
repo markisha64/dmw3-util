@@ -380,8 +380,8 @@ pub enum ScriptConditionType {
     StrongerCardBattle,
     /// c_type 122 – Inn or shop (script only)
     InnOrShop,
-    /// c_type 128..=142 (even) – Item ownership / give/take item
-    Item,
+    /// c_type 128..=142 (even) – Item ownership / give/take item; holds the raw `c_type` byte.
+    Item(u8),
     /// c_type 144 – Start cutscene (script only)
     Cutscene,
     /// Any unrecognised type; holds the raw `c_type` byte (`bitfield >> 8 & 0xfe`).
@@ -413,7 +413,7 @@ impl ScriptConditionType {
             ScriptConditionType::CardBattle => 118,
             ScriptConditionType::StrongerCardBattle => 120,
             ScriptConditionType::InnOrShop => 122,
-            ScriptConditionType::Item => 128,
+            ScriptConditionType::Item(v) => v,
             ScriptConditionType::Cutscene => 144,
             ScriptConditionType::Unknown(v) => v,
         }
@@ -443,7 +443,7 @@ impl ScriptConditionType {
             118 => ScriptConditionType::CardBattle,
             120 => ScriptConditionType::StrongerCardBattle,
             122 => ScriptConditionType::InnOrShop,
-            128..=142 => ScriptConditionType::Item,
+            128..=142 => ScriptConditionType::Item(raw),
             144 => ScriptConditionType::Cutscene,
             other => ScriptConditionType::Unknown(other),
         }
