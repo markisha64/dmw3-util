@@ -1,10 +1,11 @@
 use binrw::{BinRead, BinWrite};
 use dmw3_consts;
+use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::cmp::PartialOrd;
 use std::fmt::Debug;
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct EnemyStats {
     pub digimon_id: u16,
@@ -68,7 +69,7 @@ pub struct EnemyStats {
     counter_moveset: Moveset,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[brw(little)]
 pub struct EncounterData {
     pub digimon_id: u32,
@@ -82,7 +83,7 @@ pub struct EncounterData {
     pub multiplier: u16,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[brw(little)]
 pub struct PartyData {
     pub encounters: [Pointer; 3],
@@ -118,7 +119,7 @@ pub struct PartyData {
     _padding: u16,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct PartyExpBits {
     pub dv_exp: u32,
@@ -126,7 +127,7 @@ pub struct PartyExpBits {
     pub bits: u32,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 struct Moveset {
     action: u8,
@@ -134,7 +135,7 @@ struct Moveset {
     value: u16,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct DigivolutionData {
     pub digimon_id: u16,
@@ -221,14 +222,14 @@ pub struct DigivolutionData {
     unk_arr_1: Vec<u8>,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct Shop {
     pub item_count: u32,
     pub items: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, Eq, Ord, Default)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, Eq, Ord, Default, Serialize, Deserialize)]
 #[brw(little)]
 pub struct Pointer {
     pub value: u32,
@@ -246,7 +247,7 @@ impl PartialOrd for Pointer {
     }
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct MoveData {
     pub mp: u16,
@@ -264,7 +265,7 @@ pub struct MoveData {
     pub freq: u8,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct ItemShopData {
     unk_ptr: Pointer,
@@ -273,7 +274,7 @@ pub struct ItemShopData {
     unk: u32,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct DigivolutionCondition {
     pub index: u32,      // +1
@@ -285,14 +286,14 @@ pub struct DigivolutionCondition {
     pub rq: u16,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct DigivolutionConditions {
     #[br(count = dmw3_consts::DIGIVOLUTION_COUNT)]
     pub conditions: Vec<DigivolutionCondition>,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct StageLoadData {
     pub stage_id: u32,
@@ -300,7 +301,7 @@ pub struct StageLoadData {
     entry_function: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct Environmental {
     #[br(count = 2)]
@@ -314,7 +315,7 @@ pub struct Environmental {
     unk1: u32,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct EntityData {
     pub conditions: Pointer,
@@ -336,7 +337,7 @@ pub struct EntityData {
 /// The discriminant of each variant matches the value obtained via
 /// `bitfield >> 8 & 0xfe` in the original code (i.e. the 7-bit type
 /// shifted left by one, with bit 8 of the value masked away).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ScriptConditionType {
     /// c_type 0  – "Tamer" flag
     TamerFlag,
@@ -464,7 +465,7 @@ impl ScriptConditionType {
 /// The list is terminated by a sentinel entry where `value == 0x1ff`,
 /// `condition_type == Unknown(0xfe)` (i.e. the packed u16 == `0xffff`) and
 /// `flag == 0`.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct ScriptConditionStep {
     /// 9-bit payload (bits [8:0] of the packed `u16`).
     pub value: u16,
@@ -525,7 +526,7 @@ impl binrw::BinWrite for ScriptConditionStep {
     }
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct ComplexScriptConditionStep {
     pub id: u8,
@@ -533,7 +534,7 @@ pub struct ComplexScriptConditionStep {
     pub value: u8,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct EntityLogic {
     pub conditions: Pointer,
@@ -541,7 +542,7 @@ pub struct EntityLogic {
     pub text_index: u32,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct MapColor {
     pub red: u8,
@@ -550,7 +551,7 @@ pub struct MapColor {
     pub tint: u8,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct StageEncounter {
     pub team_id: u32,
@@ -558,14 +559,14 @@ pub struct StageEncounter {
     pub music: u32,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct StageEncounterArea {
     pub steps_inddex: u32,
     pub teams: [Pointer; 8],
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct StageEncounters {
     pub unk1: i32,
@@ -573,7 +574,7 @@ pub struct StageEncounters {
     pub areas: [Pointer; 5],
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct CardShopData {
     pub shop_id: i32,
@@ -581,14 +582,14 @@ pub struct CardShopData {
     pub items: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct CardPricing {
     pub card_id: i16,
     pub pricing: i16,
 }
 
-#[derive(BinRead, Debug, Clone, BinWrite)]
+#[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct BoosterData {
     pub booster_item_id: i32,
@@ -665,7 +666,7 @@ impl From<[u8; 4]> for Pointer {
     }
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct ScreenNameMapping {
     pub sector_name_idx: u8,
@@ -673,14 +674,14 @@ pub struct ScreenNameMapping {
     pub stage_id: u16,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct QuestRange {
     pub min: u8,
     pub max: u8,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct StageOverride {
     pub var1: i16,
@@ -688,7 +689,7 @@ pub struct StageOverride {
     pub overrides: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct EnvironmentalOverride {
     pub next_stage_id: u16,
@@ -700,7 +701,7 @@ pub struct EnvironmentalOverride {
     pub next: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct MaskObject {
     pub show: u8,
