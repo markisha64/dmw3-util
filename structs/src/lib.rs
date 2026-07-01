@@ -327,16 +327,201 @@ pub struct EntityData {
     padding: u16,
 }
 
-#[derive(BinRead, Debug, Copy, Clone, BinWrite)]
-#[brw(little)]
+/// The 7-bit type field from a `ScriptConditionStep` bitfield.
+///
+/// The raw bitfield is a `u16` packed as:
+///   - bits  [8:0]  → `value` (9 bits)
+///   - bits [15:9]  → type (7 bits, stored as `condition_type`)
+///
+/// The discriminant of each variant matches the value obtained via
+/// `bitfield >> 8 & 0xfe` in the original code (i.e. the 7-bit type
+/// shifted left by one, with bit 8 of the value masked away).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ScriptConditionType {
+    /// c_type 0  – "Tamer" flag
+    TamerFlag,
+    /// c_type 2  – Item-box opened flag
+    ItemBox,
+    /// c_type 4  – Auction done flag
+    Auction,
+    /// c_type 6  – "DDNA Megas" flag
+    DdnaMegas,
+    /// c_type 8  – Unknown flag group 2
+    Unk2,
+    /// c_type 10 – "Bosses" flag
+    Bosses,
+    /// c_type 12 – "A.o.A." flag
+    AoA,
+    /// c_type 14 – "Battled Tamer" flag
+    BattledTamer,
+    /// c_type 16 – Unknown flag group 6
+    Unk6,
+    /// c_type 24 – Unknown flag group 7
+    Unk7,
+    /// c_type 26 – "NPC I" flag
+    NpcI,
+    /// c_type 28 – "NPC II" flag
+    NpcII,
+    /// c_type 32 – Area visited flag
+    AreaVisited,
+    /// c_type 64 – Story flag
+    Story,
+    /// c_type 96 – Quest condition
+    Quest,
+    /// c_type 112 – Complex condition (references a `ComplexScriptConditionStep`)
+    Complex,
+    /// c_type 114 – Total charisma check
+    Charisma,
+    /// c_type 116 – Start scripted battle (script only)
+    ScriptedBattle,
+    /// c_type 118 – Start card battle (script only)
+    CardBattle,
+    /// c_type 120 – Start stronger card battle (script only)
+    StrongerCardBattle,
+    /// c_type 122 – Inn or shop (script only)
+    InnOrShop,
+    /// c_type 128..=142 (even) – Item ownership / give/take item
+    Item,
+    /// c_type 144 – Start cutscene (script only)
+    Cutscene,
+    /// Any unrecognised type; holds the raw `c_type` byte (`bitfield >> 8 & 0xfe`).
+    Unknown(u8),
+}
+
+impl ScriptConditionType {
+    /// Returns the `c_type` value (`bitfield >> 8 & 0xfe`) for this variant.
+    pub fn to_raw(self) -> u8 {
+        match self {
+            ScriptConditionType::TamerFlag => 0,
+            ScriptConditionType::ItemBox => 2,
+            ScriptConditionType::Auction => 4,
+            ScriptConditionType::DdnaMegas => 6,
+            ScriptConditionType::Unk2 => 8,
+            ScriptConditionType::Bosses => 10,
+            ScriptConditionType::AoA => 12,
+            ScriptConditionType::BattledTamer => 14,
+            ScriptConditionType::Unk6 => 16,
+            ScriptConditionType::Unk7 => 24,
+            ScriptConditionType::NpcI => 26,
+            ScriptConditionType::NpcII => 28,
+            ScriptConditionType::AreaVisited => 32,
+            ScriptConditionType::Story => 64,
+            ScriptConditionType::Quest => 96,
+            ScriptConditionType::Complex => 112,
+            ScriptConditionType::Charisma => 114,
+            ScriptConditionType::ScriptedBattle => 116,
+            ScriptConditionType::CardBattle => 118,
+            ScriptConditionType::StrongerCardBattle => 120,
+            ScriptConditionType::InnOrShop => 122,
+            ScriptConditionType::Item => 128,
+            ScriptConditionType::Cutscene => 144,
+            ScriptConditionType::Unknown(v) => v,
+        }
+    }
+
+    /// Construct from the raw `c_type` value (`bitfield >> 8 & 0xfe`).
+    pub fn from_raw(raw: u8) -> Self {
+        match raw {
+            0 => ScriptConditionType::TamerFlag,
+            2 => ScriptConditionType::ItemBox,
+            4 => ScriptConditionType::Auction,
+            6 => ScriptConditionType::DdnaMegas,
+            8 => ScriptConditionType::Unk2,
+            10 => ScriptConditionType::Bosses,
+            12 => ScriptConditionType::AoA,
+            14 => ScriptConditionType::BattledTamer,
+            16 => ScriptConditionType::Unk6,
+            24 => ScriptConditionType::Unk7,
+            26 => ScriptConditionType::NpcI,
+            28 => ScriptConditionType::NpcII,
+            32 => ScriptConditionType::AreaVisited,
+            64 => ScriptConditionType::Story,
+            96 => ScriptConditionType::Quest,
+            112 => ScriptConditionType::Complex,
+            114 => ScriptConditionType::Charisma,
+            116 => ScriptConditionType::ScriptedBattle,
+            118 => ScriptConditionType::CardBattle,
+            120 => ScriptConditionType::StrongerCardBattle,
+            122 => ScriptConditionType::InnOrShop,
+            128..=142 => ScriptConditionType::Item,
+            144 => ScriptConditionType::Cutscene,
+            other => ScriptConditionType::Unknown(other),
+        }
+    }
+}
+
+/// A single step in a script condition / script action list.
+///
+/// On disk this is two `u16` values in little-endian order.  The first `u16`
+/// is a packed bitfield:
+///
+/// ```text
+/// bit  15 14 13 12 11 10  9 | 8  7  6  5  4  3  2  1  0
+///      ←── condition_type ──  ←───────── value ──────────
+///                  (7 bits)               (9 bits)
+/// ```
+///
+/// The list is terminated by a sentinel entry where `value == 0x1ff`,
+/// `condition_type == Unknown(0xfe)` (i.e. the packed u16 == `0xffff`) and
+/// `flag == 0`.
+#[derive(Debug, Copy, Clone)]
 pub struct ScriptConditionStep {
-    pub bitfield: u16,
+    /// 9-bit payload (bits [8:0] of the packed `u16`).
+    pub value: u16,
+    /// 7-bit type field (bits [15:9] of the packed `u16`).
+    pub condition_type: ScriptConditionType,
     pub flag: u16,
 }
 
 impl ScriptConditionStep {
     pub fn is_last_step(self) -> bool {
-        return self.bitfield == 0xffff && self.flag == 0;
+        self.value == 0x1ff
+            && self.condition_type == ScriptConditionType::Unknown(0xfe)
+            && self.flag == 0
+    }
+}
+
+impl binrw::BinRead for ScriptConditionStep {
+    type Args<'a> = ();
+
+    fn read_options<R: std::io::Read + std::io::Seek>(
+        reader: &mut R,
+        endian: binrw::Endian,
+        _args: Self::Args<'_>,
+    ) -> binrw::BinResult<Self> {
+        let raw_bitfield = u16::read_options(reader, endian, ())?;
+        let flag = u16::read_options(reader, endian, ())?;
+
+        // value: bits [8:0]
+        let value = raw_bitfield & 0x1ff;
+        // c_type: bits [15:9] shifted into [7:1], matching `>> 8 & 0xfe`
+        let c_type = ((raw_bitfield >> 8) & 0xfe) as u8;
+        let condition_type = ScriptConditionType::from_raw(c_type);
+
+        Ok(ScriptConditionStep {
+            value,
+            condition_type,
+            flag,
+        })
+    }
+}
+
+impl binrw::BinWrite for ScriptConditionStep {
+    type Args<'a> = ();
+
+    fn write_options<W: std::io::Write + std::io::Seek>(
+        &self,
+        writer: &mut W,
+        endian: binrw::Endian,
+        _args: Self::Args<'_>,
+    ) -> binrw::BinResult<()> {
+        // Re-pack: type occupies bits [15:9], value occupies bits [8:0].
+        // c_type = raw >> 8 & 0xfe  →  raw bits [15:9] = c_type >> 1
+        let c_type = self.condition_type.to_raw() as u16;
+        let raw_bitfield = (self.value & 0x1ff) | ((c_type << 8) & 0xfe00);
+        raw_bitfield.write_options(writer, endian, ())?;
+        self.flag.write_options(writer, endian, ())?;
+        Ok(())
     }
 }
 
