@@ -4,5 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-binread = "2.2.0"
-binwrite = "0.2.1"
+binrw = "0.14"

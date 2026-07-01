@@ -5,5 +5,4 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
-binread = "2.2.0"
-binwrite = "0.2.1"
+binrw = "0.14"

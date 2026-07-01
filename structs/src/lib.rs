@@ -1,11 +1,11 @@
-use binread::BinRead;
-use binwrite::BinWrite;
+use binrw::{BinRead, BinWrite};
 use dmw3_consts;
 use std::cmp::Ordering;
 use std::cmp::PartialOrd;
 use std::fmt::Debug;
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct EnemyStats {
     pub digimon_id: u16,
 
@@ -69,6 +69,7 @@ pub struct EnemyStats {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
+#[brw(little)]
 pub struct EncounterData {
     pub digimon_id: u32,
 
@@ -82,6 +83,7 @@ pub struct EncounterData {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite, PartialEq, Eq, Hash)]
+#[brw(little)]
 pub struct PartyData {
     pub encounters: [Pointer; 3],
 
@@ -117,6 +119,7 @@ pub struct PartyData {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct PartyExpBits {
     pub dv_exp: u32,
     pub exp: u32,
@@ -124,6 +127,7 @@ pub struct PartyExpBits {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 struct Moveset {
     action: u8,
     comparator: u8,
@@ -131,6 +135,7 @@ struct Moveset {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct DigivolutionData {
     pub digimon_id: u16,
 
@@ -217,12 +222,14 @@ pub struct DigivolutionData {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct Shop {
     pub item_count: u32,
     pub items: Pointer,
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, Eq, Ord, Default)]
+#[brw(little)]
 pub struct Pointer {
     pub value: u32,
 }
@@ -240,6 +247,7 @@ impl PartialOrd for Pointer {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct MoveData {
     pub mp: u16,
     pub power: u16,
@@ -257,6 +265,7 @@ pub struct MoveData {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct ItemShopData {
     unk_ptr: Pointer,
     pub buy_price: u16,
@@ -265,6 +274,7 @@ pub struct ItemShopData {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct DigivolutionCondition {
     pub index: u32,      // +1
     pub dv_index_1: u16, // +1
@@ -276,12 +286,14 @@ pub struct DigivolutionCondition {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct DigivolutionConditions {
     #[br(count = dmw3_consts::DIGIVOLUTION_COUNT)]
     pub conditions: Vec<DigivolutionCondition>,
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct StageLoadData {
     pub stage_id: u32,
     pub file_index: u32,
@@ -289,6 +301,7 @@ pub struct StageLoadData {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct Environmental {
     #[br(count = 2)]
     pub conditions: Vec<u32>,
@@ -302,6 +315,7 @@ pub struct Environmental {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct EntityData {
     pub conditions: Pointer,
     pub logic: Pointer,
@@ -314,6 +328,7 @@ pub struct EntityData {
 }
 
 #[derive(BinRead, Debug, Copy, Clone, BinWrite)]
+#[brw(little)]
 pub struct ScriptConditionStep {
     pub bitfield: u16,
     pub flag: u16,
@@ -326,6 +341,7 @@ impl ScriptConditionStep {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct ComplexScriptConditionStep {
     pub id: u8,
     pub operation_and_type: u8,
@@ -333,6 +349,7 @@ pub struct ComplexScriptConditionStep {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct EntityLogic {
     pub conditions: Pointer,
     pub script: Pointer,
@@ -340,6 +357,7 @@ pub struct EntityLogic {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct MapColor {
     pub red: u8,
     pub green: u8,
@@ -348,6 +366,7 @@ pub struct MapColor {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct StageEncounter {
     pub team_id: u32,
     pub stage: u32,
@@ -355,12 +374,14 @@ pub struct StageEncounter {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct StageEncounterArea {
     pub steps_inddex: u32,
     pub teams: [Pointer; 8],
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct StageEncounters {
     pub unk1: i32,
     pub unk2: i32,
@@ -368,6 +389,7 @@ pub struct StageEncounters {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct CardShopData {
     pub shop_id: i32,
     _card_count: i32,
@@ -375,12 +397,14 @@ pub struct CardShopData {
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct CardPricing {
     pub card_id: i16,
     pub pricing: i16,
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite)]
+#[brw(little)]
 pub struct BoosterData {
     pub booster_item_id: i32,
     pub slots: [Pointer; 6],
@@ -457,6 +481,7 @@ impl From<[u8; 4]> for Pointer {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct ScreenNameMapping {
     pub sector_name_idx: u8,
     pub screen_name_idx: u8,
@@ -464,12 +489,14 @@ pub struct ScreenNameMapping {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct QuestRange {
     pub min: u8,
     pub max: u8,
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct StageOverride {
     pub var1: i16,
     pub var2: i16,
@@ -477,6 +504,7 @@ pub struct StageOverride {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct EnvironmentalOverride {
     pub next_stage_id: u16,
     pub var1: i16,
@@ -488,6 +516,7 @@ pub struct EnvironmentalOverride {
 }
 
 #[derive(BinRead, Debug, Clone, Copy, BinWrite)]
+#[brw(little)]
 pub struct MaskObject {
     pub show: u8,
     pub instance_id: u8,

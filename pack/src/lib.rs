@@ -1,5 +1,4 @@
-use binread::BinRead;
-use binwrite::BinWrite;
+use binrw::{BinRead, BinWrite, BinReaderExt, BinWriterExt};
 use std::io::Cursor;
 
 #[derive(Clone)]
@@ -30,10 +29,10 @@ impl Packed {
         let mut result = Vec::new();
         let mut i: u32 = (self.files.len() * 4) as u32 + 4;
 
-        (self.files.len() as u32).write(&mut result).unwrap();
+        result.write_le(&(self.files.len() as u32)).unwrap();
 
         for file in &self.files {
-            i.write(&mut result).unwrap();
+            result.write_le(&i).unwrap();
             i += file.len() as u32;
         }
 
@@ -50,7 +49,7 @@ impl Packed {
         let mut reader = Cursor::new(&file);
         let mut files: Vec<Vec<u8>> = Vec::new();
 
-        let length = u32::read(&mut reader).unwrap();
+        let length: u32 = reader.read_le().unwrap();
 
         if length == 0 {
             return Packed { files };
@@ -58,7 +57,7 @@ impl Packed {
 
         let mut offsets: Vec<u32> = Vec::new();
         for _ in 0..length {
-            offsets.push(u32::read(&mut reader).unwrap());
+            offsets.push(reader.read_le().unwrap());
         }
 
         for i in 0..offsets.len() - 1 {
@@ -80,7 +79,7 @@ impl From<Vec<u8>> for Packed {
         let mut reader = Cursor::new(&file);
         let mut files: Vec<Vec<u8>> = Vec::new();
 
-        let first_offset = u32::read(&mut reader).unwrap();
+        let first_offset: u32 = reader.read_le().unwrap();
 
         if first_offset == 0 {
             return Packed { files };
@@ -88,7 +87,7 @@ impl From<Vec<u8>> for Packed {
 
         let mut offsets: Vec<u32> = vec![first_offset];
         for _ in 1..first_offset / 4 {
-            offsets.push(u32::read(&mut reader).unwrap());
+            offsets.push(reader.read_le().unwrap());
         }
 
         let len = file.len() as u32;
@@ -128,9 +127,9 @@ impl From<Packed> for Vec<u8> {
 
         for file in &val.files {
             if file.len() == 0 {
-                (0 as u32).write(&mut result).unwrap();
+                result.write_le(&(0u32)).unwrap();
             } else {
-                i.write(&mut result).unwrap();
+                result.write_le(&i).unwrap();
             }
 
             i += file.len() as u32;
