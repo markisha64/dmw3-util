@@ -1,4 +1,4 @@
-use binrw::{BinRead, BinWrite, BinReaderExt, BinWriterExt};
+use binrw::{BinWrite, BinReaderExt};
 use std::io::Cursor;
 
 #[derive(Clone)]
@@ -26,21 +26,21 @@ impl Packed {
     }
 
     pub fn to_bytes_text(&self) -> Vec<u8> {
-        let mut result = Vec::new();
+        let mut result = Cursor::new(Vec::new());
         let mut i: u32 = (self.files.len() * 4) as u32 + 4;
 
-        result.write_le(&(self.files.len() as u32)).unwrap();
+        (self.files.len() as u32).write_le(&mut result).unwrap();
 
         for file in &self.files {
-            result.write_le(&i).unwrap();
+            i.write_le(&mut result).unwrap();
             i += file.len() as u32;
         }
 
         for file in &self.files {
-            result.extend(file);
+            result.get_mut().extend(file);
         }
 
-        result
+        result.into_inner()
     }
 }
 
@@ -122,23 +122,23 @@ impl From<Vec<u8>> for Packed {
 
 impl From<Packed> for Vec<u8> {
     fn from(val: Packed) -> Self {
-        let mut result = Vec::new();
+        let mut result = Cursor::new(Vec::new());
         let mut i: u32 = (val.files.len() * 4) as u32;
 
         for file in &val.files {
             if file.len() == 0 {
-                result.write_le(&(0u32)).unwrap();
+                (0u32).write_le(&mut result).unwrap();
             } else {
-                result.write_le(&i).unwrap();
+                i.write_le(&mut result).unwrap();
             }
 
             i += file.len() as u32;
         }
 
         for file in val.files {
-            result.extend(file);
+            result.get_mut().extend(file);
         }
 
-        result
+        result.into_inner()
     }
 }

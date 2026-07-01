@@ -1,4 +1,4 @@
-use binrw::{io::Cursor, BinRead};
+use binrw::BinRead;
 
 #[derive(BinRead)]
 #[br(little)]

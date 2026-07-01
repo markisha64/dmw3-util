@@ -3,13 +3,13 @@ name = "dmw3-util"
 version = "0.1.0"
 edition = "2021"
 
-[depdendancies]
+[dependencies]
 rlen = { path = "./rlen" }
-pack = { path = "./pack" }
-model = { path = "./model" }
-structs = { path = "./structs" }
 tim = { path = "./tim" }
-lang = { path = "./lang" }
+dmw3_pack = { path = "./pack" }
+dmw3_model = { path = "./model" }
+dmw3_structs = { path = "./structs" }
+dmw3_lang = { path = "./lang" }
 
 [workspace]
 members = [ 
@@ -19,4 +19,5 @@ members = [
   "rlen",
   "tim",
   "grid",
-  "lang"]
+  "lang",
+  "consts"]
