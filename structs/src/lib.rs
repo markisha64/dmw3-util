@@ -168,8 +168,7 @@ pub struct DigivolutionData {
 
     pub attack: u16,
 
-    #[br(count = 5)]
-    pub tech: Vec<u16>,
+    pub tech: [u16; 5],
 
     pub ori_tech: u16,
 
@@ -185,13 +184,11 @@ pub struct DigivolutionData {
 
     pub ko_rate: u8,
 
-    #[br(count = 5)]
-    pub tech_learn_level: Vec<u8>,
+    pub tech_learn_level: [u8; 5],
 
     pub ori_tech_learn_level: u8,
 
-    #[br(count = 5)]
-    pub tech_load_level: Vec<u8>,
+    pub tech_load_level: [u8; 5],
 
     dv_exp_modifier: u8,
 
@@ -207,19 +204,15 @@ pub struct DigivolutionData {
 
     pub mp_modifier: u8,
 
-    #[br(count = 6)]
-    pub stat_offsets: Vec<u8>,
+    pub stat_offsets: [u8; 6],
 
-    #[br(count = 7)]
-    pub res_offsets: Vec<u8>,
+    pub res_offsets: [u8; 7],
 
-    #[br(count = 5)]
-    pub blast_indices: Vec<u8>,
+    pub blast_indices: [u8; 5],
 
     pub dv_index: u8,
 
-    #[br(count = 2)]
-    unk_arr_1: Vec<u8>,
+    unk: u16,
 }
 
 #[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
@@ -304,8 +297,7 @@ pub struct StageLoadData {
 #[derive(BinRead, Debug, Clone, BinWrite, Serialize, Deserialize)]
 #[brw(little)]
 pub struct Environmental {
-    #[br(count = 2)]
-    pub conditions: Vec<u32>,
+    pub conditions: [ScriptConditionStep; 2],
     pub environmental_type: u16,
     pub next_stage_id: u16,
     pub next_stage_x: u16,
@@ -466,20 +458,15 @@ impl ScriptConditionType {
 /// `condition_type == Unknown(0xfe)` (i.e. the packed u16 == `0xffff`) and
 /// `flag == 0`.
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub struct ScriptConditionStep {
-    /// 9-bit payload (bits [8:0] of the packed `u16`).
-    pub value: u16,
-    /// 7-bit type field (bits [15:9] of the packed `u16`).
-    pub condition_type: ScriptConditionType,
-    pub flag: u16,
-}
-
-impl ScriptConditionStep {
-    pub fn is_last_step(self) -> bool {
-        self.value == 0x1ff
-            && self.condition_type == ScriptConditionType::Unknown(0xfe)
-            && self.flag == 0
-    }
+pub enum ScriptConditionStep {
+    EndStep,
+    Step {
+        /// 9-bit payload (bits [8:0] of the packed `u16`).
+        value: u16,
+        /// 7-bit type field (bits [15:9] of the packed `u16`).
+        condition_type: ScriptConditionType,
+        flag: u16,
+    },
 }
 
 impl binrw::BinRead for ScriptConditionStep {
@@ -493,17 +480,24 @@ impl binrw::BinRead for ScriptConditionStep {
         let raw_bitfield = u16::read_options(reader, endian, ())?;
         let flag = u16::read_options(reader, endian, ())?;
 
-        // value: bits [8:0]
-        let value = raw_bitfield & 0x1ff;
-        // c_type: bits [15:9] shifted into [7:1], matching `>> 8 & 0xfe`
-        let c_type = ((raw_bitfield >> 8) & 0xfe) as u8;
-        let condition_type = ScriptConditionType::from_raw(c_type);
+        let step = match raw_bitfield == 0xffff && flag == 0x0000 {
+            true => ScriptConditionStep::EndStep,
+            false => {
+                // value: bits [8:0]
+                let value = raw_bitfield & 0x1ff;
+                // c_type: bits [15:9] shifted into [7:1], matching `>> 8 & 0xfe`
+                let c_type = ((raw_bitfield >> 8) & 0xfe) as u8;
+                let condition_type = ScriptConditionType::from_raw(c_type);
 
-        Ok(ScriptConditionStep {
-            value,
-            condition_type,
-            flag,
-        })
+                ScriptConditionStep::Step {
+                    value,
+                    condition_type,
+                    flag,
+                }
+            }
+        };
+
+        Ok(step)
     }
 }
 
@@ -516,12 +510,24 @@ impl binrw::BinWrite for ScriptConditionStep {
         endian: binrw::Endian,
         _args: Self::Args<'_>,
     ) -> binrw::BinResult<()> {
-        // Re-pack: type occupies bits [15:9], value occupies bits [8:0].
-        // c_type = raw >> 8 & 0xfe  →  raw bits [15:9] = c_type >> 1
-        let c_type = self.condition_type.to_raw() as u16;
-        let raw_bitfield = (self.value & 0x1ff) | ((c_type << 8) & 0xfe00);
-        raw_bitfield.write_options(writer, endian, ())?;
-        self.flag.write_options(writer, endian, ())?;
+        match self {
+            Self::EndStep => {
+                0x0000ffffu32.write_options(writer, endian, ())?;
+            }
+            Self::Step {
+                value,
+                condition_type,
+                flag,
+            } => {
+                // Re-pack: type occupies bits [15:9], value occupies bits [8:0].
+                // c_type = raw >> 8 & 0xfe  →  raw bits [15:9] = c_type >> 1
+                let c_type = condition_type.to_raw() as u16;
+                let raw_bitfield = (value & 0x1ff) | ((c_type << 8) & 0xfe00);
+                raw_bitfield.write_options(writer, endian, ())?;
+                flag.write_options(writer, endian, ())?;
+            }
+        }
+
         Ok(())
     }
 }
