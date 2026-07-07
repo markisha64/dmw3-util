@@ -1,6 +1,7 @@
 use binrw::{BinRead, BinWrite};
 use dmw3_consts;
 use serde::{Deserialize, Serialize};
+use serde::{Deserializer, Serializer};
 use std::cmp::Ordering;
 use std::cmp::PartialOrd;
 use std::fmt::Debug;
@@ -222,10 +223,45 @@ pub struct Shop {
     pub items: Pointer,
 }
 
-#[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, Eq, Ord, Default, Serialize, Deserialize)]
+#[derive(BinRead, Debug, Clone, Copy, BinWrite, Hash, Eq, Ord, Default)]
 #[brw(little)]
 pub struct Pointer {
     pub value: u32,
+}
+
+impl Serialize for Pointer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&format!("0x{:08X}", self.value))
+    }
+}
+
+impl<'de> Deserialize<'de> for Pointer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+
+        let s = s
+            .strip_prefix("0x")
+            .or_else(|| s.strip_prefix("0X"))
+            .ok_or_else(|| {
+                serde::de::Error::custom("expected pointer string starting with '0x'")
+            })?;
+
+        if s.len() != 8 {
+            return Err(serde::de::Error::custom(
+                "expected exactly 8 hexadecimal digits",
+            ));
+        }
+
+        let value = u32::from_str_radix(s, 16).map_err(serde::de::Error::custom)?;
+
+        Ok(Pointer { value })
+    }
 }
 
 impl PartialEq for Pointer {
