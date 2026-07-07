@@ -469,6 +469,12 @@ pub enum ScriptConditionStep {
     },
 }
 
+impl ScriptConditionStep {
+    pub fn is_last_step(&self) -> bool {
+        matches!(self, ScriptConditionStep::EndStep)
+    }
+}
+
 impl binrw::BinRead for ScriptConditionStep {
     type Args<'a> = ();
 
